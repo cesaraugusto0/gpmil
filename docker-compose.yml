@@ -3,14 +3,11 @@ version: "3.8"
 services:
   app:
     build:
-      context: ./
-      dockerfile: docker/php/DockerFile
+      dockerfile: .docker/php/DockerFile
     container_name: euz-app
     restart: always
-    working_dir: /var/www/
     volumes:
-      - ./:/var/www
-      - ./application:/var/www/application
+      - .:/var/www/application
     environment:
       - COMPOSER_HOME=/composer
       - COMPOSER_ALLOW_SUPERUSER=1
@@ -27,14 +24,12 @@ services:
     ports:
       - "8000:80"
     volumes:
-      - ./:/var/www
-      - ./application:/var/www/application
-      - ./docker/nginx:/etc/nginx/conf.d
+      - .:/var/www/application
+      - .docker/nginx:/etc/nginx/conf.d
 
   redis:
     build:
-      context: ./
-      dockerfile: docker/redis/DockerFile
+      dockerfile: .docker/redis/DockerFile
     container_name: euz-redis
     restart: always
     ports:
@@ -44,8 +39,7 @@ services:
 
   db:
     build:
-      context: ./
-      dockerfile: docker/db/DockerFile
+      dockerfile: .docker/db/DockerFile
       # image: mysql:latest
     container_name: euz-db
     restart: always # command: "mysqld --init-file docker/db/init.sql"
