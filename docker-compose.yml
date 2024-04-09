@@ -1,47 +1,38 @@
 version: "3.8"
 
 services:
-  app:
+  gpmil-web:
+    container_name: gpmil
+    restart: always
     build:
-      dockerfile: .docker/php/DockerFile
-    container_name: euz-app
-    restart: always
-    volumes:
-      - .:/var/www/application
-    environment:
-      - COMPOSER_HOME=/composer
-      - COMPOSER_ALLOW_SUPERUSER=1
-      - APP_ENV=local
-      - APP_KEY=base64:VVjwu5Zj/sYnKzmx8NQWNtqnfW7cvmuzNZzkNrJTzx4=
-    depends_on:
-      - db
-      - redis
-
-  nginx:
-    image: nginx:1.25.1-alpine-slim
-    container_name: euz-nginx
-    restart: always
+      context: .docker/local
+      dockerfile: DockerFile
+      args:
+        WWWGROUP: '1000'
     ports:
       - "8000:80"
+    environment:
+      WWWUSER: '1000'
+      LARAVEL_SAIL: 1
     volumes:
-      - .:/var/www/application
-      - .docker/nginx:/etc/nginx/conf.d
+      - '.:/var/www/html'
+    networks:
+      - sail
+    depends_on:
+      - redis
 
   redis:
-    build:
-      dockerfile: .docker/redis/DockerFile
-    container_name: euz-redis
-    restart: always
+    image: 'redis:alpine'
     ports:
       - "6379:6379"
     volumes:
       - redis:/data
+    networks:
+      - sail
 
   db:
-    build:
-      dockerfile: .docker/db/DockerFile
-      # image: mysql:latest
     container_name: euz-db
+    image: mysql:latest
     restart: always # command: "mysqld --init-file docker/db/init.sql"
     environment:
       MYSQL_ROOT_HOST: "%"
@@ -51,6 +42,8 @@ services:
       # MYSQL_PASSWORD: "gpmil"
     ports:
       - "3306:3306"
+    networks:
+      - sail
 
   pma:
     image: phpmyadmin:latest
@@ -65,7 +58,13 @@ services:
       - 8001:80
     links:
       - db:db
+    networks:
+      - sail
 
+networks:
+  sail:
+    driver: bridge
 volumes:
   redis:
+    driver: local
   db:
