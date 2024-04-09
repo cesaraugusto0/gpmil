@@ -5,6 +5,9 @@
 
     RewriteEngine On
 
+    # usa APP_PREFIX se estiver definido
+    RewriteBase /${APP_PREFIX}/
+
     # Handle Authorization Header
     RewriteCond %{HTTP:Authorization} .
     RewriteRule .* - [E=HTTP_AUTHORIZATION:%{HTTP:Authorization}]
